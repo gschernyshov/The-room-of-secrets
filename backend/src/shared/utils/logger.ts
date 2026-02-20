@@ -1,6 +1,16 @@
 import { mkdirSync, existsSync, appendFile } from 'fs'
 import { join } from 'path'
 
+enum LogLevel {
+  PROGRESS = 'PROGRESS',
+  INFO = 'INFO',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+}
+
+type LogLevelStrings = (typeof LogLevel)[keyof typeof LogLevel]
+
 type Color = 'reset' | 'green' | 'yellow' | 'blue' | 'red' | 'magenta'
 
 class Logger {
@@ -13,8 +23,9 @@ class Logger {
     magenta: '\x1b[35m',
   }
 
-  private isDevelopment: boolean
+  private readonly isDevelopment: boolean
   private readonly logFile: string
+  private readonly logErrorsFile: string
 
   constructor() {
     this.isDevelopment = process.env.NODE_ENV === 'development'
@@ -26,12 +37,7 @@ class Logger {
     }
 
     this.logFile = join(logsDir, 'app.log')
-  }
-
-  private writeLog(level: string, message: string) {
-    const timestamp = new Date().toLocaleString()
-    const logEntry = `[${timestamp}] ${level}: ${message}\n`
-    appendFile(this.logFile, logEntry, 'utf-8', _ => {})
+    this.logErrorsFile = join(logsDir, 'errors.log')
   }
 
   private logToConsole(color: string, message: string) {
@@ -39,29 +45,40 @@ class Logger {
       console.log(`${color}${message}${Logger.colors.reset}`)
   }
 
+  private writeLog(level: LogLevelStrings, message: string) {
+    const timestamp = new Date().toLocaleString()
+    const logEntry = `[${timestamp}] ${level}: ${message}\n`
+
+    appendFile(this.logFile, logEntry, 'utf-8', _ => {})
+
+    if (level === LogLevel.ERROR) {
+      appendFile(this.logErrorsFile, logEntry, 'utf-8', _ => {})
+    }
+  }
+
   progress(msg: string) {
     this.logToConsole(Logger.colors.magenta, msg)
-    this.writeLog('PROGRESS', msg)
+    this.writeLog(LogLevel.PROGRESS, msg)
   }
 
   info(msg: string) {
     this.logToConsole(Logger.colors.blue, msg)
-    this.writeLog('INFO', msg)
+    this.writeLog(LogLevel.INFO, msg)
   }
 
   success(msg: string) {
     this.logToConsole(Logger.colors.green, msg)
-    this.writeLog('SUCCESS', msg)
+    this.writeLog(LogLevel.SUCCESS, msg)
   }
 
   warning(msg: string) {
     this.logToConsole(Logger.colors.yellow, msg)
-    this.writeLog('WARNING', msg)
+    this.writeLog(LogLevel.WARNING, msg)
   }
 
   error(msg: string) {
     this.logToConsole(Logger.colors.red, msg)
-    this.writeLog('ERROR', msg)
+    this.writeLog(LogLevel.ERROR, msg)
   }
 }
 

@@ -6,12 +6,13 @@ class UserRepository {
     id,
     username,
     email,
+    password,
     created_at AS createdAt
   `
   async createUser(
-    username: string,
-    email: string,
-    hashedPassword: string
+    username: User['username'],
+    email: User['email'],
+    hashedPassword: User['password']
   ): Promise<User> {
     const [user] = await db.query<User>(
       `INSERT INTO users (username, email, password)
@@ -21,7 +22,7 @@ class UserRepository {
     return user
   }
 
-  async findUserByEmail(email: string): Promise<User | null> {
+  async findUserByEmail(email: User['email']): Promise<User | null> {
     const [user] = await db.query<User>(
       `SELECT ${UserRepository.userSelect} FROM users WHERE email = $1`,
       [email]
@@ -29,7 +30,7 @@ class UserRepository {
     return user ?? null
   }
 
-  async findUserByUsername(username: string): Promise<User | null> {
+  async findUserByUsername(username: User['username']): Promise<User | null> {
     const [user] = await db.query<User>(
       `SELECT ${UserRepository.userSelect} FROM users WHERE username = $1`,
       [username]
@@ -37,18 +38,24 @@ class UserRepository {
     return user ?? null
   }
 
-  async updateUsername(id: number, username: string): Promise<void> {
+  async updateUsername(
+    id: User['id'],
+    username: User['username']
+  ): Promise<void> {
     await db.query(`UPDATE users SET username = $1 WHERE id = $2`, [
       username,
       id,
     ])
   }
 
-  async updateEmail(id: number, email: string): Promise<void> {
+  async updateEmail(id: User['id'], email: User['email']): Promise<void> {
     await db.query(`UPDATE users SET email = $1 WHERE id = $2 `, [email, id])
   }
 
-  async updatePassword(id: number, password: string): Promise<void> {
+  async updatePassword(
+    id: User['id'],
+    password: User['password']
+  ): Promise<void> {
     await db.query(`UPDATE users SET password = $1 WHERE id = $2`, [
       password,
       id,

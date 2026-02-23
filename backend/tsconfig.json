@@ -21,9 +21,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": [
-    "src/**/*.ts",
-    "src/server.ts" // ← явно добавьте
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }

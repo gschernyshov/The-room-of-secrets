@@ -1,30 +1,95 @@
 import { Request, Response } from 'express'
-import { userService } from '../services/userService.js'
-import { logger } from '../../../shared/utils/logger.js'
+import { authService } from '../services/auth.service.js'
 
 export const authHandler = {
   registerUser: async (req: Request, res: Response) => {
     const { username, email, password } = req.body
 
     if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Все поля обязательны' })
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Все поля обязательны' },
+      })
     }
 
     try {
-      logger.info(
-        `Регистрация пользователя: ${username}, ${email}, ${password}`
-      )
-      const user = await userService.createUser(username, email, password)
-      logger.success(
-        `Пользователь: ${username}, ${email}, ${password} зарегистрирован c id: ${user.id}`
-      )
+      const result = await authService.registerUser(username, email, password)
 
-      res.status(201).json({ user })
+      res.status(201).json({
+        success: true,
+        data: result,
+      })
     } catch (error) {
-      logger.error(
-        `При регистрации пользователя: ${username}, ${email}, ${password} возникла ошибка: ${error.message}`
-      )
-      res.status(400).json({ error: error.message })
+      res
+        .status(error.statusCode)
+        .json({ success: false, error: { message: error.message } })
+    }
+  },
+
+  loginUser: async (req: Request, res: Response) => {
+    const { email, password } = req.body
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Email и пароль обязательны' },
+      })
+    }
+
+    try {
+      const result = await authService.loginUser(email, password)
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      })
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, error: { message: error.message } })
+    }
+  },
+
+  logoutUser: async (req: Request, res: Response) => {
+    const userId = req.userId
+    const refreshToken = req.body.refreshToken
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Refresh token отсутствует' },
+      })
+    }
+
+    try {
+      await authService.logoutUser(userId, refreshToken)
+
+      return res.status(200).json({ success: true })
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, error: { message: error.message } })
+    }
+  },
+
+  refreshToken: async (req: Request, res: Response) => {
+    const refreshToken = req.body.refreshToken
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Refresh token отсутствует' },
+      })
+    }
+
+    try {
+      await authService.refreshToken(refreshToken)
+
+      return res.status(200).json({ success: true })
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json({ success: false, error: { message: error.message } })
     }
   },
 }

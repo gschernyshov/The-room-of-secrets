@@ -8,7 +8,7 @@ types.setTypeParser(1184, stringValue => {
 })
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '5445', 10),
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,

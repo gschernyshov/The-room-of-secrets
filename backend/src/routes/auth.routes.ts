@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { authHandler } from '../domains/user/handlers/auth.handler.js'
-import { requireBody } from '../middleware/requiredBody.meddlware.js'
+import { requireBody } from '../middleware/requiredBody.middleware.js'
 import { authMiddleware } from '../middleware/auth.middleware.js'
 
 const router = Router()

@@ -118,7 +118,7 @@ export const authService = {
       const storedUserId = await tokenStorage.findRefreshToken(refreshToken)
       if (!storedUserId) {
         logger.warning(
-          `Попытка выхода пользователя с id=${userId} с несуществующим refresh token: ${refreshToken}`
+          `Попытка выхода пользователя с id: ${userId} с несуществующим refresh token: ${refreshToken}`
         )
         return
       }
@@ -129,10 +129,10 @@ export const authService = {
 
       await tokenStorage.removeRefreshToken(userId, refreshToken)
 
-      logger.info(`Пользователь с id=${userId} успешно вышел`)
+      logger.info(`Пользователь с id: ${userId} успешно вышел`)
     } catch (error) {
       logger.error(
-        `При выходе пользователя с id=${userId} возникла ошибка: ${error.message.toLowerCase()}`
+        `При выходе пользователя с id: ${userId} возникла ошибка: ${error.message.toLowerCase()}`
       )
 
       if (error instanceof AppError) {
@@ -153,7 +153,7 @@ export const authService = {
       const storedUserId = await tokenStorage.findRefreshToken(refreshToken)
       if (!storedUserId) {
         throw new AppError(
-          `Refresh token для пользователя с id=${decodedToken.id} не найден или отозван`,
+          `Refresh token: ${refreshToken} для пользователя с id: ${decodedToken.userId} не найден или отозван`,
           403
         )
       }

@@ -18,9 +18,10 @@ export const authService = {
     logger.info(`Регистрация пользователя (${username}, ${email})`)
 
     try {
-      const existingUser =
-        (await userRepository.findUserByUsername(username)) ||
-        (await userRepository.findUserByEmail(email))
+      const existingUser = await userRepository.findUserByEmailOrUsername(
+        email,
+        username
+      )
 
       if (existingUser) {
         throw new AppError(

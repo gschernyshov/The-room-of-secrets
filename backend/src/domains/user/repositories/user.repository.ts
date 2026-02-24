@@ -38,6 +38,17 @@ class UserRepository {
     return user ?? null
   }
 
+  async findUserByEmailOrUsername(
+    email: User['email'],
+    username: User['username']
+  ): Promise<User | null> {
+    const [user] = await db.query<User>(
+      `SELECT ${UserRepository.userSelect} FROM users WHERE email=$1 OR username=$2`,
+      [email, username]
+    )
+    return user ?? null
+  }
+
   async updateUsername(
     id: User['id'],
     username: User['username']

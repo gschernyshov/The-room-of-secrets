@@ -4,6 +4,5 @@ export class AppError extends Error {
     public statusCode: number = 400
   ) {
     super(message)
-    this.name = 'AppError'
   }
 }

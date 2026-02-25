@@ -1,5 +1,5 @@
-import { USER_REGISTERED } from '../events/userRegistered.event.js'
-import { User } from '../types/user.type.js'
+import { USER_REGISTERED } from '../events/registered.event.js'
+import { User } from '../../user/types/user.type.js'
 import { eventBus } from '../../../infrastructure/events/eventBus.js'
 import { logger } from '../../../shared/utils/logger.js'
 

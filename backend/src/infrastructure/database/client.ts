@@ -16,10 +16,9 @@ const pool = new Pool({
 })
 
 export const db = {
-  connect: async () => {
-    logger.progress('Подключение к БД...')
-
+  connect: async (): Promise<void> => {
     try {
+      logger.progress('Подключение к БД...')
       await pool.query('SELECT NOW()')
       logger.success('Подключение к БД успешно выполнено')
     } catch (error) {
@@ -27,10 +26,12 @@ export const db = {
       throw error
     }
   },
-  disconnect: async () => {
+
+  disconnect: async (): Promise<void> => {
     await pool.end()
-    logger.info('Соединение с БД закрыто')
+    logger.warning('Соединение с БД закрыто')
   },
+
   query: async <T extends QueryResultRow>(
     text: string,
     params?: QueryParam[]

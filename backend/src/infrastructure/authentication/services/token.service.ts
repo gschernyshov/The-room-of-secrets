@@ -1,13 +1,17 @@
 import jwt from 'jsonwebtoken'
-import { TOKEN_CONFIG } from './config.js'
+import { TokenPayload } from '../types/token.type.js'
+import { User } from '../../../domains/user/types/user.type.js'
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET
+const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_TOKEN_SECRET
-const ACCESS_TOKEN_EXPIRES_IN = TOKEN_CONFIG.ACCESS_TOKEN_EXPIRES_IN
-const REFRESH_TOKEN_EXPIRES_IN = TOKEN_CONFIG.REFRESH_TOKEN_EXPIRES_IN
+const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN
+
+type GenerateTokensResult = Record<'accessToken' | 'refreshToken', string>
+type VerifyTokenResult = TokenPayload | null
 
 export const tokenService = {
-  generateTokens(userId: number) {
+  generateTokens: (userId: User['id']): GenerateTokensResult => {
     const accessToken = jwt.sign({ userId }, ACCESS_TOKEN_SECRET, {
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     })
@@ -19,7 +23,7 @@ export const tokenService = {
     return { accessToken, refreshToken }
   },
 
-  verifyToken(token: string) {
+  verifyToken: (token: string): VerifyTokenResult => {
     try {
       return jwt.verify(token, ACCESS_TOKEN_SECRET)
     } catch (_) {
@@ -27,7 +31,7 @@ export const tokenService = {
     }
   },
 
-  verifyRefreshToken(token: string) {
+  verifyRefreshToken: (token: string): VerifyTokenResult => {
     try {
       return jwt.verify(token, REFRESH_TOKEN_SECRET)
     } catch (_) {

@@ -1,5 +1,5 @@
 import { User } from '../types/user.type.js'
-import { db } from '../../../infrastructure/database/client.js'
+import { db } from '../../../infrastructure/database/index.js'
 
 class UserRepository {
   private static readonly userSelect = `
@@ -13,13 +13,13 @@ class UserRepository {
     username: User['username'],
     email: User['email'],
     hashedPassword: User['password']
-  ): Promise<User> {
+  ): Promise<User | null> {
     const [user] = await db.query<User>(
       `INSERT INTO users (username, email, password)
        VALUES ($1, $2, $3) RETURNING ${UserRepository.userSelect}`,
       [username, email, hashedPassword]
     )
-    return user
+    return user ?? null
   }
 
   async findUserByEmail(email: User['email']): Promise<User | null> {

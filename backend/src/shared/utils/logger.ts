@@ -14,6 +14,7 @@ type LogLevelStrings = (typeof LogLevel)[keyof typeof LogLevel]
 type Color = 'reset' | 'green' | 'yellow' | 'blue' | 'red' | 'magenta'
 
 class Logger {
+  private static readonly isDevelopment = process.env.NODE_ENV === 'development'
   private static readonly colors: Record<Color, string> = {
     reset: '\x1b[0m',
     green: '\x1b[32m',
@@ -23,15 +24,10 @@ class Logger {
     magenta: '\x1b[35m',
   }
 
-  private readonly isDevelopment: boolean
   private readonly logFile: string
   private readonly logErrorsFile: string
 
-  constructor() {
-    this.isDevelopment = process.env.NODE_ENV === 'development'
-
-    const logsDir = join(process.cwd(), 'logs')
-
+  constructor(private readonly logsDir = join(process.cwd(), 'logs')) {
     if (!existsSync(logsDir)) {
       mkdirSync(logsDir, { recursive: true })
     }
@@ -41,7 +37,7 @@ class Logger {
   }
 
   private logToConsole(color: string, message: string) {
-    if (this.isDevelopment)
+    if (Logger.isDevelopment)
       console.log(`${color}${message}${Logger.colors.reset}`)
   }
 

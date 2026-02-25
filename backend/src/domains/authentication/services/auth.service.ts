@@ -1,16 +1,15 @@
-import { userRepository } from '../repositories/user.repository.js'
-import { USER_REGISTERED } from '../events/userRegistered.event.js'
-import { USER_LOGIN } from '../events/userLogin.event.js'
-import { User } from '../types/user.type.js'
+import { USER_REGISTERED } from '../events/registered.event.js'
+import { USER_LOGIN } from '../events/login.event.js'
+import { userRepository } from '../../user/repositories/user.repository.js'
+import { User } from '../../user/types/user.type.js'
+import { sessionService } from '../../../infrastructure/authentication/services/session.service.js'
+import { passwordService } from '../../../infrastructure/authentication/services/crypto.service.js'
 import { eventBus } from '../../../infrastructure/events/eventBus.js'
-import { passwordService } from '../../../shared/utils/hash.js'
-import { tokenService } from '../../../shared/utils/jwt.js'
-import { tokenStorage } from '../../../shared/utils/tokenStorage.js'
 import { logger } from '../../../shared/utils/logger.js'
 import { AppError } from '../../../shared/utils/errors.js'
 
 export const authService = {
-  registerUser: async (
+  register: async (
     username: User['username'],
     email: User['email'],
     password: User['password']
@@ -22,7 +21,6 @@ export const authService = {
         email,
         username
       )
-
       if (existingUser) {
         throw new AppError(
           'Пользователь с таким username или email уже существует',
@@ -37,9 +35,13 @@ export const authService = {
         email,
         hashedPassword
       )
+      if (!user) {
+        throw new AppError('Не удалось создать пользователя', 500)
+      }
 
-      const { accessToken, refreshToken } = tokenService.generateTokens(user.id)
-      await tokenStorage.saveRefreshToken(user.id, refreshToken)
+      const { accessToken, refreshToken } = await sessionService.createSession(
+        user.id
+      )
 
       eventBus.emit(USER_REGISTERED, user)
 
@@ -64,7 +66,7 @@ export const authService = {
     }
   },
 
-  loginUser: async (email: User['email'], password: User['password']) => {
+  login: async (email: User['email'], password: User['password']) => {
     logger.info(`Авторизация пользователя с email: ${email}`)
 
     try {
@@ -81,10 +83,9 @@ export const authService = {
         throw new AppError('Неверный email или пароль', 401)
       }
 
-      const { accessToken, refreshToken } = tokenService.generateTokens(user.id)
-
-      await tokenStorage.removeRefreshTokenByUserId(user.id)
-      await tokenStorage.saveRefreshToken(user.id, refreshToken)
+      const { accessToken, refreshToken } = await sessionService.createSession(
+        user.id
+      )
 
       eventBus.emit(USER_LOGIN, user)
 
@@ -109,26 +110,9 @@ export const authService = {
     }
   },
 
-  logoutUser: async (userId: User['id'], refreshToken: string) => {
+  logout: async (userId: User['id'], refreshToken: string) => {
     try {
-      const decodedToken = tokenService.verifyRefreshToken(refreshToken)
-      if (!decodedToken) {
-        throw new AppError('Неверный refresh token', 401)
-      }
-
-      const storedUserId = await tokenStorage.findRefreshToken(refreshToken)
-      if (!storedUserId) {
-        logger.warning(
-          `Попытка выхода пользователя с id: ${userId} с несуществующим refresh token: ${refreshToken}`
-        )
-        return
-      }
-
-      if (userId !== storedUserId) {
-        throw new AppError('Несоответствие пользователя и токена', 401)
-      }
-
-      await tokenStorage.removeRefreshToken(userId, refreshToken)
+      await sessionService.invalidateSession(userId, refreshToken)
 
       logger.info(`Пользователь с id: ${userId} успешно вышел`)
     } catch (error) {
@@ -144,26 +128,10 @@ export const authService = {
     }
   },
 
-  refreshToken: async (refreshToken: string) => {
+  refresh: async (refreshToken: string) => {
     try {
-      const decodedToken = tokenService.verifyRefreshToken(refreshToken)
-      if (!decodedToken) {
-        throw new AppError('Неверный refresh token', 401)
-      }
-
-      const storedUserId = await tokenStorage.findRefreshToken(refreshToken)
-      if (!storedUserId) {
-        throw new AppError(
-          `Refresh token: ${refreshToken} для пользователя с id: ${decodedToken.userId} не найден или отозван`,
-          403
-        )
-      }
-
-      const { accessToken, refreshToken: newRefreshToken } =
-        tokenService.generateTokens(storedUserId)
-
-      await tokenStorage.removeRefreshToken(storedUserId, refreshToken)
-      await tokenStorage.saveRefreshToken(storedUserId, newRefreshToken)
+      const { accessToken, newRefreshToken } =
+        await sessionService.refreshSession(refreshToken)
 
       return {
         accessToken,

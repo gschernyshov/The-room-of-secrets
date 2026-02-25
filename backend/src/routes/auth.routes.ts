@@ -1,17 +1,44 @@
 import { Router } from 'express'
-import { authHandler } from '../domains/user/handlers/auth.handler.js'
-import { requireBody } from '../middleware/requiredBody.middleware.js'
-import { authMiddleware } from '../middleware/auth.middleware.js'
+import { authHandler } from '../domains/authentication/handlers/auth.handler.js'
+import {
+  validateRegister,
+  validateLogin,
+  validateLogout,
+  validateRefresh,
+} from '../domains/authentication/validations/index.js'
+import { validateMiddleware } from '../middlewares/validation.middleware.js'
+import { authenticateMiddleware } from '../infrastructure/authentication/middlewares/authenticate.middleware.js'
 
 const router = Router()
 
-router.post('/register', requireBody, authHandler.registerUser)
-router.post('/login', requireBody, authHandler.loginUser)
-router.post('/logout', requireBody, authMiddleware, authHandler.logoutUser)
-router.post('/refresh', requireBody, authHandler.refreshToken)
+router.post(
+  '/register',
+  ...validateRegister,
+  validateMiddleware,
+  authHandler.register
+)
 
-router.get('/state', authMiddleware, (_, res) => {
-  return res.status(401).json({ message: 'Пользователь авторизован' })
+router.post('/login', ...validateLogin, validateMiddleware, authHandler.login)
+
+router.post(
+  '/logout',
+  ...validateLogout,
+  validateMiddleware,
+  authenticateMiddleware,
+  authHandler.logout
+)
+
+router.post(
+  '/refresh',
+  ...validateRefresh,
+  validateMiddleware,
+  authHandler.refresh
+)
+
+router.get('/state', authenticateMiddleware, (_, res) => {
+  return res
+    .status(200)
+    .json({ success: true, data: { message: 'Пользователь авторизован' } })
 })
 
 export default router

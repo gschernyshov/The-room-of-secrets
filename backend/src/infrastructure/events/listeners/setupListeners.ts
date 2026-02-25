@@ -1,5 +1,5 @@
-import { setupUserRegisteredListener } from '../../../domains/user/listeners/onUserRegistered.listener.js'
-import { setupUserLoginListener } from '../../../domains/user/listeners/onUserLogin.listener.js'
+import { setupUserRegisteredListener } from '../../../domains/authentication/listeners/onRegistered.listener.js'
+import { setupUserLoginListener } from '../../../domains/authentication/listeners/onLogin.listener.js'
 import { logger } from '../../../shared/utils/logger.js'
 
 export const setupListeners = () => {

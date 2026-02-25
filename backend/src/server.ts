@@ -1,10 +1,8 @@
 import http from 'http'
 import { app } from './app.js'
-import { db } from './infrastructure/database/client.js'
-import { runMigrations } from './infrastructure/database/migrate.js'
+import { db, runMigrations, redis } from './infrastructure/database/index.js'
 import { setupListeners } from './infrastructure/events/listeners/setupListeners.js'
 import { logger } from './shared/utils/logger.js'
-import { connectRedis } from './shared/utils/tokenStorage.js'
 
 const server = http.createServer(app)
 
@@ -16,7 +14,7 @@ const startServer = async () => {
   try {
     await db.connect()
     await runMigrations()
-    await connectRedis()
+    await redis.connect()
 
     setupListeners()
 

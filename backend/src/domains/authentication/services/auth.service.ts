@@ -1,5 +1,4 @@
-import { USER_REGISTERED } from '../events/registered.event.js'
-import { USER_LOGIN } from '../events/login.event.js'
+import { USER_REGISTERED, USER_LOGIN } from '../events/index.js'
 import { userRepository } from '../../user/repositories/user.repository.js'
 import { User } from '../../user/types/user.type.js'
 import { sessionService } from '../../../infrastructure/authentication/services/session.service.js'
@@ -28,7 +27,7 @@ export const authService = {
         )
       }
 
-      const hashedPassword = await passwordService.hashPassword(password)
+      const hashedPassword = await passwordService.hash(password)
 
       const user = await userRepository.createUser(
         username,
@@ -39,9 +38,7 @@ export const authService = {
         throw new AppError('Не удалось создать пользователя', 500)
       }
 
-      const { accessToken, refreshToken } = await sessionService.createSession(
-        user.id
-      )
+      const { accessToken, refreshToken } = await sessionService.create(user.id)
 
       eventBus.emit(USER_REGISTERED, user)
 
@@ -75,7 +72,7 @@ export const authService = {
         throw new AppError('Неверный email или пароль', 401)
       }
 
-      const isPasswordValid = await passwordService.comparePassword(
+      const isPasswordValid = await passwordService.compare(
         password,
         user.password
       )
@@ -83,9 +80,7 @@ export const authService = {
         throw new AppError('Неверный email или пароль', 401)
       }
 
-      const { accessToken, refreshToken } = await sessionService.createSession(
-        user.id
-      )
+      const { accessToken, refreshToken } = await sessionService.create(user.id)
 
       eventBus.emit(USER_LOGIN, user)
 
@@ -112,7 +107,7 @@ export const authService = {
 
   logout: async (userId: User['id'], refreshToken: string) => {
     try {
-      await sessionService.invalidateSession(userId, refreshToken)
+      await sessionService.invalidate(userId, refreshToken)
 
       logger.info(`Пользователь с id: ${userId} успешно вышел`)
     } catch (error) {
@@ -131,7 +126,7 @@ export const authService = {
   refresh: async (refreshToken: string) => {
     try {
       const { accessToken, newRefreshToken } =
-        await sessionService.refreshSession(refreshToken)
+        await sessionService.refresh(refreshToken)
 
       return {
         accessToken,

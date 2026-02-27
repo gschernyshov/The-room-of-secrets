@@ -7,7 +7,7 @@ import { eventBus } from '../../../infrastructure/events/eventBus.js'
 import { AppError } from '../../../shared/utils/errors.js'
 
 export const roomService = {
-  createRoom: (creatorId: User['id'], name: Room['name']) => {
+  create: (creatorId: User['id'], name: Room['name']) => {
     const room: Room = {
       id: randomUUID(),
       name,
@@ -22,7 +22,7 @@ export const roomService = {
     return room
   },
 
-  joinRoom: (userId: User['id'], roomId: Room['id']) => {
+  join: (userId: User['id'], roomId: Room['id']) => {
     try {
       const room = roomRepository.findById(roomId)
       if (!room) {

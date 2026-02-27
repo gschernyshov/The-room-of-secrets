@@ -23,7 +23,7 @@ export const roomHandler = (socket: Socket, userId: User['id']) => {
         const { name } = payload as { name: unknown }
         if (!isValidName(name)) throw new Error('Невалидные данные')
 
-        const room = roomService.createRoom(userId, name)
+        const room = roomService.create(userId, name)
 
         await socket.join(room.id)
 
@@ -50,7 +50,7 @@ export const roomHandler = (socket: Socket, userId: User['id']) => {
         const { roomId } = payload as { roomId: unknown }
         if (!isValidRoomId(roomId)) throw new Error('Невалидные данные')
 
-        const { room, messages } = roomService.joinRoom(userId, roomId)
+        const { room, messages } = roomService.join(userId, roomId)
 
         await socket.join(roomId)
 

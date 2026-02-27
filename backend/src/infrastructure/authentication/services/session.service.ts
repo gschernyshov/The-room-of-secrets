@@ -8,7 +8,7 @@ type CreateSessionResult = Record<'accessToken' | 'refreshToken', string>
 type RefreshSessionResult = Record<'accessToken' | 'newRefreshToken', string>
 
 export const sessionService = {
-  createSession: async (userId: User['id']): Promise<CreateSessionResult> => {
+  create: async (userId: User['id']): Promise<CreateSessionResult> => {
     const { accessToken, refreshToken } = tokenService.generateTokens(userId)
 
     await tokenRepository.removeRefreshTokenByUserId(userId)
@@ -17,7 +17,7 @@ export const sessionService = {
     return { accessToken, refreshToken }
   },
 
-  invalidateSession: async (
+  invalidate: async (
     userId: User['id'],
     refreshToken: string
   ): Promise<void> => {
@@ -41,9 +41,7 @@ export const sessionService = {
     await tokenRepository.removeRefreshToken(userId, refreshToken)
   },
 
-  refreshSession: async (
-    refreshToken: string
-  ): Promise<RefreshSessionResult> => {
+  refresh: async (refreshToken: string): Promise<RefreshSessionResult> => {
     const tokenPayload = tokenService.verifyRefreshToken(refreshToken)
     if (!tokenPayload) {
       throw new AppError('Неверный refresh token', 401)

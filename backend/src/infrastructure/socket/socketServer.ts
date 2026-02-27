@@ -42,11 +42,18 @@ export const initializeSocketServer = (
   })
 
   io.on('connection', socket => {
+    const userId = socket.data.user.id
+
+    if (!userId) {
+      socket.disconnect(true)
+      return
+    }
+
     logger.info(
       `Пользователь с id: ${socket.data.user.id} подключился к серверу через сокет с id: ${socket.id}`
     )
 
-    roomHandler(socket)
+    roomHandler(socket, userId)
 
     socket.on('disconnect', reason => {
       logger.info(

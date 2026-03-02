@@ -1,7 +1,7 @@
 import { USER_REGISTERED, USER_LOGIN } from '../events/index.js'
 import { userRepository } from '../../user/repositories/user.repository.js'
-import { User } from '../../user/types/user.type.js'
-import { sessionService } from '../../../infrastructure/authentication/services/session.service.js'
+import { type User } from '../../user/types/user.type.js'
+import { sessionService } from './session.service.js'
 import { passwordService } from '../../../infrastructure/authentication/services/crypto.service.js'
 import { eventBus } from '../../../infrastructure/events/eventBus.js'
 import { logger } from '../../../shared/utils/logger.js'
@@ -16,7 +16,7 @@ export const authService = {
     logger.info(`Регистрация пользователя (${username}, ${email})`)
 
     try {
-      const existingUser = await userRepository.findUserByEmailOrUsername(
+      const existingUser = await userRepository.findByEmailOrUsername(
         email,
         username
       )
@@ -29,11 +29,7 @@ export const authService = {
 
       const hashedPassword = await passwordService.hash(password)
 
-      const user = await userRepository.createUser(
-        username,
-        email,
-        hashedPassword
-      )
+      const user = await userRepository.create(username, email, hashedPassword)
       if (!user) {
         throw new AppError('Не удалось создать пользователя', 500)
       }
@@ -67,7 +63,7 @@ export const authService = {
     logger.info(`Авторизация пользователя с email: ${email}`)
 
     try {
-      const user = await userRepository.findUserByEmail(email)
+      const user = await userRepository.findByEmail(email)
       if (!user) {
         throw new AppError('Неверный email или пароль', 401)
       }
@@ -109,10 +105,10 @@ export const authService = {
     try {
       await sessionService.invalidate(userId, refreshToken)
 
-      logger.info(`Пользователь с id: ${userId} успешно вышел`)
+      logger.info(`Пользователь id: ${userId} успешно вышел`)
     } catch (error) {
       logger.error(
-        `При выходе пользователя с id: ${userId} возникла ошибка: ${error.message.toLowerCase()}`
+        `При выходе пользователя id: ${userId} возникла ошибка: ${error.message.toLowerCase()}`
       )
 
       if (error instanceof AppError) {

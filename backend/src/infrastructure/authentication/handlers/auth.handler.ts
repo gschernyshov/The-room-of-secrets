@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { authService } from '../services/auth.service.js'
+import { authService } from '../../../domains/authentication/services/auth.service.js'
 
 export const authHandler = {
   register: async (req: Request, res: Response) => {

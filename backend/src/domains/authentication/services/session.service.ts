@@ -1,6 +1,6 @@
-import { tokenService } from './token.service.js'
+import { tokenService } from '../../../infrastructure/authentication/services/token.service.js'
 import { tokenRepository } from '../repositories/token.repository.js'
-import { User } from '../../../domains/user/types/user.type.js'
+import { type User } from '../../user/types/user.type.js'
 import { logger } from '../../../shared/utils/logger.js'
 import { AppError } from '../../../shared/utils/errors.js'
 
@@ -29,7 +29,7 @@ export const sessionService = {
     const storedUserId = await tokenRepository.findRefreshToken(refreshToken)
     if (!storedUserId) {
       logger.warning(
-        `Попытка выхода пользователя с id: ${userId} с несуществующим refresh token: ${refreshToken}`
+        `Попытка выхода пользователя id: ${userId} с несуществующим refresh token: ${refreshToken}`
       )
       return
     }
@@ -50,7 +50,7 @@ export const sessionService = {
     const storedUserId = await tokenRepository.findRefreshToken(refreshToken)
     if (!storedUserId) {
       logger.warning(
-        `Refresh token: ${refreshToken} для пользователя с id: ${tokenPayload.userId} не найден или отозван`
+        `Refresh token: ${refreshToken} для пользователя id: ${tokenPayload.userId} не найден или отозван`
       )
       throw new AppError('Неверный refresh token', 401)
     }

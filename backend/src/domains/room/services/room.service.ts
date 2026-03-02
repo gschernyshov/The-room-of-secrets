@@ -48,7 +48,7 @@ export const roomService = {
     try {
       const room = await roomRepository.findById(roomId)
       if (!room) {
-        throw new AppError(`Комната не найдена`)
+        throw new AppError('Комната не найдена', 401)
       }
 
       if (!room.participants.includes(userId)) {
@@ -69,7 +69,7 @@ export const roomService = {
         throw error
       }
 
-      throw new Error(
+      throw new AppError(
         'При попытке присоединения к комнате возникла непредвиденная ошибка'
       )
     }

@@ -1,6 +1,6 @@
 import { Server } from 'socket.io'
 import { createServer } from 'http'
-import { roomHandler } from './handlers/socket.handler.js'
+import { roomHandler, messageHandler } from './handlers/index.js'
 import { tokenService } from '../authentication/services/token.service.js'
 import { logger } from '../../shared/utils/logger.js'
 
@@ -11,7 +11,7 @@ export const initializeSocketServer = (
 
   const io = new Server(server, {
     cors: {
-      origin: '*', // ['http://localhost:3000'],
+      origin: [process.env.CORS_ORIGINS || 'http://localhost:3003'],
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -54,6 +54,7 @@ export const initializeSocketServer = (
     )
 
     roomHandler(socket, userId)
+    messageHandler(socket, userId)
 
     socket.on('disconnect', reason => {
       logger.info(

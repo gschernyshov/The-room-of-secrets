@@ -1,15 +1,12 @@
 import { type Socket } from 'socket.io'
-import {
-  isValidMessageContent,
-  isValidName,
-  isValidRoomId,
-} from '../validations/index.js'
-import { type SocketCallback } from '../types/room.type.js'
+import { type SocketCallback } from '../types/socket.type..js'
 import { type User } from '../../../domains/user/types/user.type.js'
 import { roomService } from '../../../domains/room/services/room.service.js'
+import { isValidRoomId } from '../../../domains/room/validations/roomId.validation.js'
 import { type Room } from '../../../domains/room/types/room.type.js'
-import { messageService } from '../../../domains/message/services/message.service.js'
+import { isValidName } from '../../../domains/room/validations/name.validation.js'
 import { type Message } from '../../../domains/message/types/message.type.js'
+import { AppError } from '../../../shared/utils/errors.js'
 
 export const roomHandler = (socket: Socket, userId: User['id']) => {
   socket.on(
@@ -17,10 +14,10 @@ export const roomHandler = (socket: Socket, userId: User['id']) => {
     async (payload: unknown, callback?: SocketCallback<Room>) => {
       try {
         if (!payload || typeof payload !== 'object' || !('name' in payload))
-          throw new Error('Невалидные данные')
+          throw new AppError('Невалидные данные', 400)
 
         const { name } = payload as { name: unknown }
-        if (!isValidName(name)) throw new Error('Невалидные данные')
+        if (!isValidName(name)) throw new AppError('Невалидные данные', 400)
 
         const room = await roomService.create(name, userId)
 
@@ -44,10 +41,10 @@ export const roomHandler = (socket: Socket, userId: User['id']) => {
     ) => {
       try {
         if (!payload || typeof payload !== 'object' || !('roomId' in payload))
-          throw new Error('Невалидные данные')
+          throw new AppError('Невалидные данные', 400)
 
         const { roomId } = payload as { roomId: unknown }
-        if (!isValidRoomId(roomId)) throw new Error('Невалидные данные')
+        if (!isValidRoomId(roomId)) throw new AppError('Невалидные данные', 400)
 
         const { room, messages } = await roomService.join(roomId, userId)
 
@@ -69,55 +66,14 @@ export const roomHandler = (socket: Socket, userId: User['id']) => {
   )
 
   socket.on(
-    'send_message',
-    async (payload: unknown, callback?: SocketCallback) => {
-      try {
-        if (
-          !payload ||
-          typeof payload !== 'object' ||
-          !('roomId' in payload) ||
-          !('content' in payload)
-        )
-          throw new Error('Невалидные данные')
-
-        const { roomId, content } = payload as {
-          roomId: unknown
-          content: unknown
-        }
-        if (!isValidRoomId(roomId) || !isValidMessageContent(content))
-          throw new Error('Невалидные данные')
-
-        if (!socket.rooms.has(roomId)) {
-          throw new Error('Доступ запрещён: вы не состоите в этой комнате')
-        }
-
-        const message = await messageService.send(
-          roomId,
-          userId,
-          content.trim()
-        )
-
-        socket.to(roomId).emit('new_message', message)
-
-        return callback?.({ success: true })
-      } catch (error) {
-        return callback?.({
-          success: false,
-          error: { message: error.message },
-        })
-      }
-    }
-  )
-
-  socket.on(
     'leave_room',
     async (payload: unknown, callback?: SocketCallback) => {
       try {
         if (!payload || typeof payload !== 'object' || !('roomId' in payload))
-          throw new Error('Невалидные данные')
+          throw new AppError('Невалидные данные', 400)
 
         const { roomId } = payload as { roomId: unknown }
-        if (!isValidRoomId(roomId)) throw new Error('Невалидные данные')
+        if (!isValidRoomId(roomId)) throw new AppError('Невалидные данные', 400)
 
         await socket.leave(roomId)
 

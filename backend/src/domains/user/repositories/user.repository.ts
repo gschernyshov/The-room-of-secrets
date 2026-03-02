@@ -1,4 +1,4 @@
-import { User } from '../types/user.type.js'
+import { type User } from '../types/user.type.js'
 import { db } from '../../../infrastructure/database/index.js'
 
 class UserRepository {
@@ -9,7 +9,7 @@ class UserRepository {
     password,
     created_at AS createdAt
   `
-  async createUser(
+  async create(
     username: User['username'],
     email: User['email'],
     hashedPassword: User['password']
@@ -22,7 +22,7 @@ class UserRepository {
     return user ?? null
   }
 
-  async findUserByEmail(email: User['email']): Promise<User | null> {
+  async findByEmail(email: User['email']): Promise<User | null> {
     const [user] = await db.query<User>(
       `SELECT ${UserRepository.userSelect} FROM users WHERE email = $1`,
       [email]
@@ -30,7 +30,7 @@ class UserRepository {
     return user ?? null
   }
 
-  async findUserByUsername(username: User['username']): Promise<User | null> {
+  async findByUsername(username: User['username']): Promise<User | null> {
     const [user] = await db.query<User>(
       `SELECT ${UserRepository.userSelect} FROM users WHERE username = $1`,
       [username]
@@ -38,7 +38,7 @@ class UserRepository {
     return user ?? null
   }
 
-  async findUserByEmailOrUsername(
+  async findByEmailOrUsername(
     email: User['email'],
     username: User['username']
   ): Promise<User | null> {

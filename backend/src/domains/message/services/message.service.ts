@@ -1,9 +1,10 @@
-import { messageRepository } from '../repositories/message.repository.js'
-import { Message } from '../types/message.type.js'
-import { User } from '../../user/types/user.type.js'
-import { Room } from '../../room/types/room.type.js'
-import { AppError } from '../../../shared/utils/errors.js'
 import { randomUUID } from 'crypto'
+import { messageRepository } from '../repositories/message.repository.js'
+import { type Message } from '../types/message.type.js'
+import { type User } from '../../user/types/user.type.js'
+import { type Room } from '../../room/types/room.type.js'
+import { logger } from '../../../shared/utils/logger.js'
+import { AppError } from '../../../shared/utils/errors.js'
 
 export const messageService = {
   send: async (
@@ -24,6 +25,8 @@ export const messageService = {
 
       return message
     } catch (error) {
+      logger.error(`При отправке сообщения возникла ошибка: ${error.message}`)
+
       throw new AppError(
         'При отправке сообщения возникла непредвиденная ошибка',
         500

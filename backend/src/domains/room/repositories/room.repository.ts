@@ -1,5 +1,5 @@
-import { Room } from '../types/room.type.js'
-import { User } from '../../user/types/user.type.js'
+import { type Room } from '../types/room.type.js'
+import { type User } from '../../user/types/user.type.js'
 import { db } from '../../../infrastructure/database/client.js'
 
 class RoomRepository {

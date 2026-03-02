@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { TokenPayload } from '../types/token.type.js'
-import { User } from '../../../domains/user/types/user.type.js'
+import { type User } from '../../../domains/user/types/user.type.js'
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET
 const ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN

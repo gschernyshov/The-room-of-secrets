@@ -1,11 +1,11 @@
 import { Router } from 'express'
-import { authHandler } from '../domains/authentication/handlers/auth.handler.js'
 import {
   validateRegister,
   validateLogin,
   validateLogout,
   validateRefresh,
 } from '../domains/authentication/validations/index.js'
+import { authHandler } from '../infrastructure/authentication/handlers/auth.handler.js'
 import { validateMiddleware } from '../middlewares/validation.middleware.js'
 import { authenticateMiddleware } from '../infrastructure/authentication/middlewares/authenticate.middleware.js'
 

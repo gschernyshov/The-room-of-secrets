@@ -1,5 +1,5 @@
-import { redis } from '../../database/redis.client.js'
-import { User } from '../../../domains/user/types/user.type.js'
+import { redis } from '../../../infrastructure/database/redis.client.js'
+import { type User } from '../../user/types/user.type.js'
 import { parseTTL } from '../../../shared/utils/parseTTL.js'
 
 const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN

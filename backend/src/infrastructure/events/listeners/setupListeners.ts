@@ -1,10 +1,21 @@
-import { setupUserRegisteredListener } from '../../../domains/authentication/listeners/onRegistered.listener.js'
-import { setupUserLoginListener } from '../../../domains/authentication/listeners/onLogin.listener.js'
+import {
+  setupUserRegisteredListener,
+  setupUserLoginListener,
+} from '../../../domains/authentication/listeners/index.js'
+import {
+  setupUpdatedUserEmailListener,
+  setupUpdatedUsernameListener,
+  setupUpdatedUserPasswordListener,
+} from '../../../domains/user/listeners/index.js'
 import { logger } from '../../../shared/utils/logger.js'
 
 export const setupListeners = () => {
   setupUserRegisteredListener()
   setupUserLoginListener()
+
+  setupUpdatedUsernameListener()
+  setupUpdatedUserEmailListener()
+  setupUpdatedUserPasswordListener()
 
   logger.info('Слушатели событий инициализированы')
 }

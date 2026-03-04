@@ -22,6 +22,14 @@ class UserRepository {
     return user ?? null
   }
 
+  async findById(id: User['id']): Promise<User | null> {
+    const [user] = await db.query<User>(
+      `SELECT ${UserRepository.userSelect} FROM users WHERE id = $1`,
+      [id]
+    )
+    return user ?? null
+  }
+
   async findByEmail(email: User['email']): Promise<User | null> {
     const [user] = await db.query<User>(
       `SELECT ${UserRepository.userSelect} FROM users WHERE email = $1`,
